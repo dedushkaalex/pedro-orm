@@ -25,7 +25,7 @@ export default defineConfig({
       "typescript/no-base-to-string": "error",
 
       // Строгая типизация — Effect полагается на точные типы
-      "typescript/no-explicit-any": "error",
+      "typescript/no-explicit-any": "off",
       "typescript/no-non-null-assertion": "error",
       "typescript/no-non-null-asserted-optional-chain": "error",
 

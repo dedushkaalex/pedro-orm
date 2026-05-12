@@ -34,14 +34,17 @@
     "test": "vp test"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.4.5",
+    "better-sqlite3": "^12.9.0",
     "effect": "^3.21.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.5.0",
     "@typescript/native-preview": "7.0.0-dev.20260328.1",
     "bumpp": "^11.0.1",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2",
+    "typescript": "^5.7.0",
     "vite-plus": "^0.1.14"
   },
   "packageManager": "pnpm@11.0.8"
