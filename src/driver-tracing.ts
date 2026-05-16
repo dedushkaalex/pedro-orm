@@ -1,12 +1,12 @@
 import { Effect, Layer } from "effect";
-import { DriverDependency } from "./driver.ts";
+import { Driver } from "./driver.ts";
 
 export const TracingLayer = Layer.effect(
-  DriverDependency,
+  Driver,
   Effect.gen(function* () {
-    const inner = yield* DriverDependency;
+    const inner = yield* Driver;
 
-    return DriverDependency.of({
+    return Driver.of({
       dialect: inner.dialect,
       executeRaw: (sql, params) =>
         inner.executeRaw(sql, params).pipe(

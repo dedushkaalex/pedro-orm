@@ -1,5 +1,5 @@
-import type { ColumnDef } from "./columns.ts";
-import type { TableDef } from "./table.ts";
+import { integer, nullable, primaryKey, text, type ColumnDef } from "./columns.ts";
+import { table, type TableDef } from "./table.ts";
 
 export type SqlToTs = {
   integer: number;
@@ -19,30 +19,42 @@ export type InferRow<T extends TableDef<string, any>> = {
   [K in keyof T["_columns"]]: InferColumn<T["_columns"][K]>;
 };
 
-// Insert-тип отличается: PK с автоинкрементом опциональные
+// Helpers для читаемости — раскладываем логику InferInsert на шаги.
+type Prettify<T> = { [K in keyof T]: T[K] } & {};
+type Cols<T> = T extends TableDef<string, infer C> ? C : never;
+type Col<T, K extends keyof Cols<T>> = Cols<T>[K];
 
-export type InferInsert<T extends TableDef<string, any>> = {
-  [K in keyof T["_columns"] as T["_columns"][K]["_pk"] extends true ? never : K]: InferColumn<
-    T["_columns"][K]
-  >;
-} & {
-  [K in keyof T["_columns"] as T["_columns"][K]["_pk"] extends true ? K : never]?: InferColumn<
-    T["_columns"][K]
-  >;
-};
+// Optional в insert = PK ИЛИ has default.
+type IsOptional<C> = C extends { _pk: true }
+  ? true
+  : C extends { _hasDefault: true }
+    ? true
+    : false;
+
+type OptionalKeys<T> = {
+  [K in keyof Cols<T>]: IsOptional<Col<T, K>> extends true ? K : never;
+}[keyof Cols<T>];
+
+type RequiredKeys<T> = Exclude<keyof Cols<T>, OptionalKeys<T>>;
+
+export type InferInsert<T extends TableDef<string, any>> = Prettify<
+  { [K in RequiredKeys<T>]: InferColumn<Col<T, K>> } & {
+    [K in OptionalKeys<T>]?: InferColumn<Col<T, K>>;
+  }
+>;
 
 /**
  * example
  */
-// const users = table("users", {
-//   id: primaryKey(integer()),
-//   name: text(),
-//   email: text(),
-//   age: nullable(integer()),
-// });
+const users = table("users", {
+  id: primaryKey(integer(2)),
+  name: text("hello"),
+  email: text(),
+  age: nullable(integer()),
+});
 
-// type User = InferRow<typeof users>;
+export type User = InferRow<typeof users>;
 // //   ^? { id: number; name: string; email: string; age: number | null }
 
-// type NewUser = InferInsert<typeof users>;
+export type NewUser = InferInsert<typeof users>;
 // //   ^? { name: string; email: string; age: number | null; id?: number }

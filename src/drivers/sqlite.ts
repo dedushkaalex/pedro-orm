@@ -1,13 +1,15 @@
 // drivers/sqlite.ts
 import { Effect, Layer } from "effect";
 import Database from "better-sqlite3";
-import { DriverDependency } from "../driver.ts";
+import { Driver } from "../driver.ts";
 import { SqliteDialect } from "../dialect.ts";
 import {
   DbError,
   UniqueViolationError,
   ForeignKeyViolationError,
   type DriverError,
+  NotNullViolationError,
+  CheckViolationError,
 } from "../errors.ts";
 
 export interface SqliteOptions {
@@ -33,7 +35,7 @@ const make = (options: SqliteOptions) =>
       (instance) => Effect.sync(() => instance.close()),
     );
 
-    return DriverDependency.of({
+    return Driver.of({
       dialect: SqliteDialect,
       executeRaw: (sql, params) =>
         Effect.try({
@@ -70,7 +72,17 @@ const mapSqliteError = (
   if (code?.startsWith("SQLITE_CONSTRAINT_FOREIGNKEY")) {
     return new ForeignKeyViolationError({ constraint: "fk_violation", sql });
   }
+
+  if (code === "SQLITE_CONSTRAINT_CHECK") {
+    const constraint = msg.match(/CHECK constraint failed: (.+)$/)?.[1] ?? "unknown";
+    return new CheckViolationError({ constraint, sql });
+  }
+  if (code === "SQLITE_CONSTRAINT_NOTNULL") {
+    const column = msg.match(/NOT NULL constraint failed: (.+)$/)?.[1] ?? "unknown";
+    return new NotNullViolationError({ column, sql });
+  }
+
   return new DbError({ cause, sql, params });
 };
 
-export const layer = (options: SqliteOptions) => Layer.scoped(DriverDependency, make(options));
+export const layer = (options: SqliteOptions) => Layer.scoped(Driver, make(options));

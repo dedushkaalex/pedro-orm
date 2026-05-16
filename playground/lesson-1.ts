@@ -1,12 +1,12 @@
 // example/lesson-1.ts
 import { Effect, Layer } from "effect";
-import { DriverDependency } from "../src/driver.ts";
+import { Driver } from "../src/driver.ts";
 import { TracingLayer } from "../src/driver-tracing.ts";
 import * as PGliteDriver from "../src/drivers/pglite.ts";
 import * as SqliteDriver from "../src/drivers/sqlite.ts";
 
 const program = Effect.gen(function* () {
-  const db = yield* DriverDependency;
+  const db = yield* Driver;
   const ph = (n: number) => db.dialect.placeholder(n);
   const id = db.dialect.quoteIdentifier;
 

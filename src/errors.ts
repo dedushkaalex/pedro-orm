@@ -25,6 +25,16 @@ export class ForeignKeyViolationError extends Data.TaggedError("ForeignKeyViolat
   readonly sql: string;
 }> {}
 
+export class CheckViolationError extends Data.TaggedError("CheckViolationError")<{
+  readonly constraint: string;
+  readonly sql: string;
+}> {}
+
+export class NotNullViolationError extends Data.TaggedError("NotNullViolationError")<{
+  readonly column: string;
+  readonly sql: string;
+}> {}
+
 export class StatementTimeoutError extends Data.TaggedError("StatementTimeoutError")<{
   readonly sql: string;
   readonly timeoutMs: number;
@@ -41,4 +51,6 @@ export type DriverError =
   | UniqueViolationError
   | ForeignKeyViolationError
   | StatementTimeoutError
-  | CodecError;
+  | CodecError
+  | NotNullViolationError
+  | CheckViolationError;

@@ -15,8 +15,5 @@ export interface DriverImpl {
     params: ReadonlyArray<unknown>,
   ) => Effect.Effect<RawResult, DriverError>;
 }
-
-export class DriverDependency extends Context.Tag("our-orm/Driver")<
-  DriverDependency,
-  DriverImpl
->() {}
+// Driver сервис
+export class Driver extends Context.Tag("Driver")<Driver, DriverImpl>() {}
