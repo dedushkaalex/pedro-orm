@@ -3,7 +3,7 @@
 import { booleanCodec, dateCodec, jsonCodec, type Codec } from "../codec.ts";
 import type { DbDialectId } from "../dialect.ts";
 
-export type SqlType = "integer" | "real" | "text" | "blob" | "boolean";
+export type SqlType = "integer" | "real" | "text" | "blob" | "boolean" | "varchar";
 
 export interface ColumnDef<
   T extends SqlType = SqlType,
@@ -11,6 +11,7 @@ export interface ColumnDef<
   PK extends boolean = boolean,
   Default = never,
   HasD extends boolean = false,
+  VarcharLength extends number = never,
 > {
   readonly _type: T;
   readonly _nullable: Null;
@@ -18,6 +19,7 @@ export interface ColumnDef<
   readonly _default?: Default;
   readonly _hasDefault: HasD;
   readonly _codec?: (dialectId: "postgres" | "sqlite") => Codec<unknown, unknown>;
+  readonly _varcharLength?: VarcharLength;
 }
 
 export const withCodec = <TS, SQL, Column extends ColumnDef>(
@@ -56,6 +58,16 @@ export const integer = <T extends number = never>(
     HasD<T>
   >;
 };
+
+export const varchar = <T extends number = never>(
+  num: T,
+): ColumnDef<"varchar", false, false, never, false, T> => ({
+  _type: "varchar",
+  _nullable: false,
+  _pk: false,
+  _varcharLength: num,
+  _hasDefault: false,
+});
 
 export const text = <T extends string = never>(
   _default?: T,

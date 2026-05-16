@@ -7,6 +7,7 @@ export type SqlToTs = {
   text: string;
   boolean: boolean;
   blob: Uint8Array;
+  varchar: string;
 };
 
 // Достаем TS-тип одной колонки с учетом nullable
